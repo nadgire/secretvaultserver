@@ -1,0 +1,23 @@
+{
+  "version": 2,
+  "builds": [
+    {
+      "src": "server.js",
+      "use": "@vercel/node"
+    }
+  ],
+  "routes": [
+    {
+      "src": "/(.*)",
+      "dest": "/server.js"
+    }
+  ],
+  "env": {
+    "DB_CONNECTION_STRING": "@db_connection_string"
+  },
+  "functions": {
+    "server.js": {
+      "maxDuration": 10
+    }
+  }
+}
