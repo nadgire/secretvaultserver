@@ -62,7 +62,38 @@ const createUsersTable = async () => {
   }
 };
 
+// Create passwords table if it doesn't exist
+const createPasswordsTable = async () => {
+  try {
+    const query = `
+      CREATE TABLE IF NOT EXISTS passwords (
+        id SERIAL PRIMARY KEY,
+        user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+        title VARCHAR(255) NOT NULL,
+        username VARCHAR(255),
+        password TEXT,
+        website VARCHAR(500),
+        notes TEXT,
+        mobile_id INTEGER,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        deleted BOOLEAN DEFAULT false
+      );
+    `;
+    
+    await pool.query(query);
+    console.log('✅ Passwords table created/verified');
+  } catch (error) {
+    console.error('❌ Error creating passwords table:', error);
+  }
+};
+
 // Initialize database
-createUsersTable();
+const initializeTables = async () => {
+  await createUsersTable();
+  await createPasswordsTable();
+};
+
+initializeTables();
 
 module.exports = pool;

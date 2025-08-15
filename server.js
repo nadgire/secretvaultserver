@@ -4,6 +4,7 @@ const helmet = require('helmet');
 require('dotenv').config({ path: '../.env' });
 
 const authRoutes = require('./routes/auth');
+const passwordRoutes = require('./routes/passwords');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -15,6 +16,7 @@ app.use(express.json());
 
 // Routes
 app.use('/api/auth', authRoutes);
+app.use('/api/passwords', passwordRoutes);
 
 // Health check endpoint
 app.get('/api/health', (req, res) => {
