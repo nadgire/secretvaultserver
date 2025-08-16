@@ -75,6 +75,7 @@ const createPasswordsTable = async () => {
         passcode VARCHAR(255),
         website VARCHAR(500),
         notes TEXT,
+        category VARCHAR(100) DEFAULT 'Applications',
         mobile_id INTEGER,
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
         updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
@@ -91,6 +92,14 @@ const createPasswordsTable = async () => {
       console.log('✅ Added passcode column to existing table');
     } catch (error) {
       console.log('ℹ️ Passcode column already exists or table is new');
+    }
+
+    // Add category column if it doesn't exist (migration for existing databases)
+    try {
+      await pool.query('ALTER TABLE passwords ADD COLUMN IF NOT EXISTS category VARCHAR(100) DEFAULT \'Applications\';');
+      console.log('✅ Added category column to existing table');
+    } catch (error) {
+      console.log('ℹ️ Category column already exists or table is new');
     }
   } catch (error) {
     console.error('❌ Error creating passwords table:', error);
