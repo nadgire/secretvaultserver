@@ -136,9 +136,9 @@ router.delete('/delete-account', async (req, res) => {
       });
     }
 
-    // Soft delete the user by setting deleted_at timestamp
+    // Soft delete the user by setting deleted_at timestamp and is_active = false
     await pool.query(
-      'UPDATE users SET deleted_at = CURRENT_TIMESTAMP, updated_at = CURRENT_TIMESTAMP WHERE email = $1 AND google_id = $2',
+      'UPDATE users SET deleted_at = CURRENT_TIMESTAMP, is_active = false, updated_at = CURRENT_TIMESTAMP WHERE email = $1 AND google_id = $2',
       [email, google_id]
     );
 
@@ -174,9 +174,9 @@ router.post('/reactivate-account', async (req, res) => {
       });
     }
 
-    // Reactivate the user by clearing deleted_at timestamp
+    // Reactivate the user by clearing deleted_at timestamp and setting is_active = true
     const reactivatedUser = await pool.query(
-      'UPDATE users SET deleted_at = NULL, updated_at = CURRENT_TIMESTAMP WHERE email = $1 RETURNING *',
+      'UPDATE users SET deleted_at = NULL, is_active = true, updated_at = CURRENT_TIMESTAMP WHERE email = $1 RETURNING *',
       [email]
     );
 
