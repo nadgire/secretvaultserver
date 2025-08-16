@@ -5,7 +5,7 @@ const router = express.Router();
 // POST /api/passwords - Create new password entry
 router.post('/', async (req, res) => {
   try {
-    const { user_id, title, username, password, website, notes } = req.body;
+    const { user_id, title, username, password, passcode, website, notes } = req.body;
 
     if (!user_id || !title) {
       return res.status(400).json({
@@ -15,10 +15,10 @@ router.post('/', async (req, res) => {
     }
 
     const newPassword = await pool.query(
-      `INSERT INTO passwords (user_id, title, username, password, website, notes) 
-       VALUES ($1, $2, $3, $4, $5, $6) 
+      `INSERT INTO passwords (user_id, title, username, password, passcode, website, notes) 
+       VALUES ($1, $2, $3, $4, $5, $6, $7) 
        RETURNING *`,
-      [user_id, title, username, password, website, notes]
+      [user_id, title, username, password, passcode, website, notes]
     );
 
     res.json({
@@ -63,15 +63,15 @@ router.get('/user/:userId', async (req, res) => {
 router.put('/:id', async (req, res) => {
   try {
     const { id } = req.params;
-    const { title, username, password, website, notes } = req.body;
+    const { title, username, password, passcode, website, notes } = req.body;
 
     const updatedPassword = await pool.query(
       `UPDATE passwords 
-       SET title = $1, username = $2, password = $3, website = $4, notes = $5, 
+       SET title = $1, username = $2, password = $3, passcode = $4, website = $5, notes = $6, 
            updated_at = CURRENT_TIMESTAMP 
-       WHERE id = $6 AND deleted = false 
+       WHERE id = $7 AND deleted = false 
        RETURNING *`,
-      [title, username, password, website, notes, id]
+      [title, username, password, passcode, website, notes, id]
     );
 
     if (updatedPassword.rows.length === 0) {
@@ -150,10 +150,10 @@ router.post('/sync', async (req, res) => {
         switch (operation) {
           case 'CREATE':
             const newPassword = await pool.query(
-              `INSERT INTO passwords (user_id, title, username, password, website, notes, mobile_id) 
-               VALUES ($1, $2, $3, $4, $5, $6, $7) 
+              `INSERT INTO passwords (user_id, title, username, password, passcode, website, notes, mobile_id) 
+               VALUES ($1, $2, $3, $4, $5, $6, $7, $8) 
                RETURNING *`,
-              [user_id, data.title, data.username, data.password, data.website, data.notes, mobile_id]
+              [user_id, data.title, data.username, data.password, data.passcode, data.website, data.notes, mobile_id]
             );
             syncResults.push({ operation: 'CREATE', success: true, password: newPassword.rows[0] });
             break;
@@ -161,11 +161,11 @@ router.post('/sync', async (req, res) => {
           case 'UPDATE':
             const updatedPassword = await pool.query(
               `UPDATE passwords 
-               SET title = $1, username = $2, password = $3, website = $4, notes = $5, 
+               SET title = $1, username = $2, password = $3, passcode = $4, website = $5, notes = $6, 
                    updated_at = CURRENT_TIMESTAMP 
-               WHERE mobile_id = $6 AND user_id = $7 
+               WHERE mobile_id = $7 AND user_id = $8 
                RETURNING *`,
-              [data.title, data.username, data.password, data.website, data.notes, mobile_id, user_id]
+              [data.title, data.username, data.password, data.passcode, data.website, data.notes, mobile_id, user_id]
             );
             syncResults.push({ operation: 'UPDATE', success: true, password: updatedPassword.rows[0] });
             break;

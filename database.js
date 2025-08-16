@@ -72,6 +72,7 @@ const createPasswordsTable = async () => {
         title VARCHAR(255) NOT NULL,
         username VARCHAR(255),
         password TEXT,
+        passcode VARCHAR(255),
         website VARCHAR(500),
         notes TEXT,
         mobile_id INTEGER,
@@ -83,8 +84,26 @@ const createPasswordsTable = async () => {
     
     await pool.query(query);
     console.log('✅ Passwords table created/verified');
+
+    // Add passcode column if it doesn't exist (migration for existing databases)
+    try {
+      await pool.query('ALTER TABLE passwords ADD COLUMN IF NOT EXISTS passcode VARCHAR(255);');
+      console.log('✅ Added passcode column to existing table');
+    } catch (error) {
+      console.log('ℹ️ Passcode column already exists or table is new');
+    }
   } catch (error) {
     console.error('❌ Error creating passwords table:', error);
+  }
+};
+
+// Add deleted_at column to users table (migration for soft delete)
+const addDeletedAtColumn = async () => {
+  try {
+    await pool.query('ALTER TABLE users ADD COLUMN IF NOT EXISTS deleted_at TIMESTAMP NULL;');
+    console.log('✅ Added deleted_at column to users table');
+  } catch (error) {
+    console.log('ℹ️ Deleted_at column already exists or table is new');
   }
 };
 
@@ -92,6 +111,7 @@ const createPasswordsTable = async () => {
 const initializeTables = async () => {
   await createUsersTable();
   await createPasswordsTable();
+  await addDeletedAtColumn();
 };
 
 initializeTables();
